@@ -54,6 +54,13 @@ export default function AdminMatches() {
     }
 
     const updateResult = async (matchId: string, local: number, visitor: number) => {
+        console.log("Finalizing match:", matchId, { local, visitor })
+
+        if (!matchId) {
+            alert("Error: ID del partido no encontrado")
+            return
+        }
+
         const { error } = await supabase
             .from('matches')
             .update({
@@ -61,14 +68,14 @@ export default function AdminMatches() {
                 visitor_score: Math.floor(visitor),
                 status: 'finished'
             })
-            .eq('id', matchId)
+            .match({ id: matchId })
 
         if (error) {
-            console.error(error)
+            console.error("Supabase Error:", error)
             alert("Error al finalizar partido: " + error.message)
         } else {
             fetchMatches()
-            alert("Partido finalizado y puntos calculados!")
+            alert("¡Partido finalizado y puntos calculados!")
         }
     }
 
