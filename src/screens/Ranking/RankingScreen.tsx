@@ -12,7 +12,7 @@ export default function RankingScreen() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        if (user) fetchJoinedCommunities()
+        if (user) fetchUserCommunities()
     }, [user])
 
     useEffect(() => {

@@ -13,6 +13,13 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+    React.useEffect(() => {
+        // Force redirect to root if we are on a subpath upon fresh load/refresh
+        if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+            window.location.replace('/');
+        }
+    }, [])
+
     return (
         <AuthProvider>
             <Router>
