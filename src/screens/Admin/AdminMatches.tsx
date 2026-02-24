@@ -7,6 +7,7 @@ import { es } from 'date-fns/locale'
 
 export default function AdminMatches() {
     const [matches, setMatches] = useState<Match[]>([])
+    const [communities, setCommunities] = useState<any[]>([])
     const [isAdding, setIsAdding] = useState(false)
     const [loading, setLoading] = useState(true)
     const [form, setForm] = useState({
@@ -14,11 +15,21 @@ export default function AdminMatches() {
         visitor_team: '',
         match_date: '',
         phase: 'Grupos',
+        community_id: '',
     })
 
     useEffect(() => {
         fetchMatches()
+        fetchCommunities()
     }, [])
+
+    const fetchCommunities = async () => {
+        const { data } = await supabase.from('communities').select('id, name')
+        if (data) {
+            setCommunities(data)
+            if (data.length > 0) setForm(f => ({ ...f, community_id: data[0].id }))
+        }
+    }
 
     const fetchMatches = async () => {
         setLoading(true)
@@ -38,7 +49,7 @@ export default function AdminMatches() {
         if (!error) {
             setIsAdding(false)
             fetchMatches()
-            setForm({ local_team: '', visitor_team: '', match_date: '', phase: 'Grupos' })
+            setForm({ ...form, local_team: '', visitor_team: '', match_date: '' })
         }
     }
 
@@ -92,8 +103,34 @@ export default function AdminMatches() {
                             onChange={e => setForm({ ...form, match_date: e.target.value })}
                             required
                         />
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-400 uppercase">Fase</label>
+                            <select
+                                className="w-full h-10 border rounded px-3"
+                                value={form.phase}
+                                onChange={e => setForm({ ...form, phase: e.target.value })}
+                            >
+                                {['Grupos', 'Octavos', 'Cuartos', 'Semis', 'Final'].map(p => (
+                                    <option key={p} value={p}>{p}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-400 uppercase">Módulo</label>
+                            <select
+                                className="w-full h-10 border rounded px-3"
+                                value={form.community_id}
+                                onChange={e => setForm({ ...form, community_id: e.target.value })}
+                                required
+                            >
+                                <option value="">Seleccionar...</option>
+                                {communities.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex gap-2">
-                            <Button type="submit" className="flex-1">Guardar</Button>
+                            <Button type="submit" className="flex-1" disabled={!form.community_id}>Guardar</Button>
                             <Button type="button" variant="ghost" onClick={() => setIsAdding(false)}>X</Button>
                         </div>
                     </form>
