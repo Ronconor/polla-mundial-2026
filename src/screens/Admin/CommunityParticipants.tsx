@@ -15,6 +15,7 @@ export default function CommunityParticipants() {
     const [punishingUser, setPunishingUser] = useState<any>(null)
     const [punishPoints, setPunishPoints] = useState(0)
     const [punishReason, setPunishReason] = useState('')
+    const [isSearching, setIsSearching] = useState(false)
 
     useEffect(() => {
         if (id) {
@@ -45,6 +46,7 @@ export default function CommunityParticipants() {
             return
         }
 
+        setIsSearching(true)
         const { data } = await supabase
             .from('profiles')
             .select('*')
@@ -52,6 +54,7 @@ export default function CommunityParticipants() {
             .limit(5)
 
         if (data) setSearchResults(data)
+        setIsSearching(false)
     }
 
     const addMember = async (profileId: string) => {
@@ -121,24 +124,36 @@ export default function CommunityParticipants() {
                         className="pl-10"
                     />
 
-                    {searchResults.length > 0 && (
+                    {searchQuery.length >= 3 && (
                         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-30 overflow-hidden">
-                            {searchResults.map(p => (
-                                <button
-                                    key={p.id}
-                                    onClick={() => addMember(p.id)}
-                                    disabled={members.some(m => m.profiles.id === p.id)}
-                                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-0 disabled:opacity-50"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold text-xs uppercase">
-                                            {p.nickname[0]}
+                            {isSearching ? (
+                                <div className="px-4 py-3 text-sm text-slate-500 animate-pulse">Buscando...</div>
+                            ) : searchResults.length > 0 ? (
+                                searchResults.map(p => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => addMember(p.id)}
+                                        disabled={members.some(m => m.profiles.id === p.id)}
+                                        className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-0 disabled:opacity-50"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold text-xs uppercase">
+                                                {p.nickname[0]}
+                                            </div>
+                                            <span className="font-medium text-slate-700">{p.nickname}</span>
                                         </div>
-                                        <span className="font-medium text-slate-700">{p.nickname}</span>
-                                    </div>
-                                    <UserPlus className="w-4 h-4 text-primary-600" />
-                                </button>
-                            ))}
+                                        <div className="flex items-center gap-2">
+                                            {members.some(m => m.profiles.id === p.id) ? (
+                                                <span className="text-[10px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full uppercase">Ya es miembro</span>
+                                            ) : (
+                                                <UserPlus className="w-4 h-4 text-primary-600" />
+                                            )}
+                                        </div>
+                                    </button>
+                                ))
+                            ) : (
+                                <div className="px-4 py-3 text-sm text-slate-500">No se encontraron usuarios</div>
+                            )}
                         </div>
                     )}
                 </div>
