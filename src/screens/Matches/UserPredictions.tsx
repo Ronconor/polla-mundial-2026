@@ -56,11 +56,14 @@ export default function UserPredictions() {
 
     const savePredictions = async () => {
         setSaving(true)
-        const toUpsert = Object.values(predictions).map(p => ({
-            ...p,
-            profile_id: user?.id,
-            // Note: community_id should be passed here, for simplicity we assume one main community or global
-        }))
+        const toUpsert = Object.values(predictions).map(p => {
+            const match = matches.find(m => m.id === p.match_id)
+            return {
+                ...p,
+                profile_id: user?.id,
+                community_id: match?.community_id // Important for trigger logic
+            }
+        })
 
         const { error } = await supabase.from('predictions').upsert(toUpsert)
         if (!error) {

@@ -13,8 +13,27 @@ import ProfileScreen from './Common/ProfileScreen'
 import UserCommunities from './Communities/UserCommunities'
 
 export default function Dashboard() {
-    const { profile, isAdmin } = useAuth()
+    const { profile, isAdmin, user } = useAuth()
     const location = useLocation()
+    const [totalPoints, setTotalPoints] = useState<number>(0)
+
+    useEffect(() => {
+        if (user) {
+            fetchTotalPoints()
+        }
+    }, [user])
+
+    const fetchTotalPoints = async () => {
+        const { data } = await supabase
+            .from('community_members')
+            .select('points')
+            .eq('profile_id', user?.id)
+
+        if (data) {
+            const total = data.reduce((acc, curr) => acc + (curr.points || 0), 0)
+            setTotalPoints(total)
+        }
+    }
 
     const navItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -112,7 +131,7 @@ export default function Dashboard() {
                     <div className="flex items-center gap-4">
                         <div className="text-right hidden sm:block">
                             <p className="text-xs text-slate-500">Mi Puntaje</p>
-                            <p className="font-bold text-primary-600">-- pts</p>
+                            <p className="font-bold text-primary-600">{totalPoints} pts</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold border-2 border-white shadow-sm capitalize">
                             {profile?.nickname?.[0] || 'U'}
