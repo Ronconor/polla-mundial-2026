@@ -38,7 +38,7 @@ export default function UserCommunities() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {communities.map(item => (
-                        <Card key={item.id} className="hover:border-primary-200 transition-all group overflow-hidden">
+                        <Card key={item.id} className="hover:border-primary-200 transition-all group overflow-hidden relative">
                             <div className="h-2 bg-primary-600 absolute top-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                             <div className="p-2">
                                 <div className="flex justify-between items-start mb-4">
@@ -52,7 +52,7 @@ export default function UserCommunities() {
                                 </div>
 
                                 <h3 className="text-lg font-bold text-slate-900 group-hover:text-primary-600 transition-colors truncate">
-                                    {item.communities.name}
+                                    {item.communities?.name || 'Módulo desconocido'}
                                 </h3>
 
                                 <div className="flex items-center gap-2 mt-4 text-xs font-bold text-slate-400 uppercase tracking-tighter">

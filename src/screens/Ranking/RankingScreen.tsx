@@ -12,14 +12,14 @@ export default function RankingScreen() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetchUserCommunities()
-    }, [])
+        if (user) fetchJoinedCommunities()
+    }, [user])
 
     useEffect(() => {
-        if (selectedCommId) {
+        if (selectedCommId && user) {
             fetchRankings(selectedCommId)
         }
-    }, [selectedCommId])
+    }, [selectedCommId, user])
 
     const fetchUserCommunities = async () => {
         // Fetch communities where the user is a member

@@ -187,9 +187,11 @@ function Summary() {
     }, [user])
 
     const fetchStats = async () => {
+        if (!user?.id) return
+
         const { count: mCount } = await supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'scheduled')
-        const { count: pCount } = await supabase.from('predictions').select('*', { count: 'exact', head: true }).eq('profile_id', user?.id)
-        const { count: cCount } = await supabase.from('community_members').select('*', { count: 'exact', head: true }).eq('profile_id', user?.id)
+        const { count: pCount } = await supabase.from('predictions').select('*', { count: 'exact', head: true }).eq('profile_id', user.id)
+        const { count: cCount } = await supabase.from('community_members').select('*', { count: 'exact', head: true }).eq('profile_id', user.id)
 
         setStats({
             matches: mCount || 0,
