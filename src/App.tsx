@@ -24,8 +24,6 @@ function App() {
     }, [])
 
     return (
-
-    return (
         <AuthProvider>
             <Router>
                 <Routes>
