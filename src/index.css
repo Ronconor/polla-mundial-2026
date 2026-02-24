@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@layer base {
+    body {
+        @apply bg-slate-50 text-slate-900 font-sans;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 active:scale-95;
+    }
+
+    .btn-primary {
+        @apply bg-blue-600 text-white;
+    }
+
+    .card {
+        @apply bg-white rounded-xl shadow-sm border border-slate-100 p-4;
+    }
+}
