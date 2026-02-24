@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase, Community, Profile } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { Card, Button, Input } from '../../components/UI'
@@ -6,6 +7,7 @@ import { Plus, Users, Search, Trash2, Shield, UserPlus } from 'lucide-react'
 
 export default function AdminCommunities() {
     const { user } = useAuth()
+    const navigate = useNavigate()
     const [communities, setCommunities] = useState<Community[]>([])
     const [isCreating, setIsCreating] = useState(false)
     const [newName, setNewName] = useState('')
@@ -78,7 +80,7 @@ export default function AdminCommunities() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {communities.map(community => (
-                        <CommunityCard key={community.id} community={community} onRefresh={fetchCommunities} />
+                        <CommunityCard key={community.id} community={community} onRefresh={fetchCommunities} navigate={navigate} />
                     ))}
                     {communities.length === 0 && !isCreating && (
                         <div className="col-span-full py-12 text-center text-slate-400">
@@ -91,7 +93,7 @@ export default function AdminCommunities() {
     )
 }
 
-function CommunityCard({ community, onRefresh }: { community: Community, onRefresh: () => void }) {
+function CommunityCard({ community, onRefresh, navigate }: { community: Community, onRefresh: () => void, navigate: any }) {
     const [membersCount, setMembersCount] = useState(0)
 
     useEffect(() => {
@@ -125,11 +127,21 @@ function CommunityCard({ community, onRefresh }: { community: Community, onRefre
             </div>
 
             <div className="mt-6 pt-6 border-t border-slate-50 flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 gap-2">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => navigate(`/dashboard/admin/communities/${community.id}/members`)}
+                >
                     <UserPlus className="w-4 h-4" />
                     Miembros
                 </Button>
-                <Button variant="primary" size="sm" className="flex-1">
+                <Button
+                    variant="primary"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => navigate(`/dashboard/admin/communities/${community.id}/members`)}
+                >
                     Gestionar
                 </Button>
             </div>
