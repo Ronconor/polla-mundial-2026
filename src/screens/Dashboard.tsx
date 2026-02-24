@@ -179,6 +179,8 @@ function Summary() {
         })
     }
 
+    if (!profile) return <div className="py-12 text-center text-slate-400">Cargando perfil...</div>
+
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

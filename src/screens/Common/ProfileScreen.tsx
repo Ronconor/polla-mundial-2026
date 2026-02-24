@@ -10,8 +10,30 @@ export default function ProfileScreen() {
         phone: profile?.phone || '',
         location: profile?.location || '',
     })
+
+    React.useEffect(() => {
+        if (profile) {
+            setFormData({
+                phone: profile.phone || '',
+                location: profile.location || '',
+            })
+        }
+    }, [profile])
+
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+
+    if (!profile) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                <AlertCircle className="w-12 h-12 text-slate-300" />
+                <div>
+                    <h3 className="text-lg font-bold text-slate-800">No se encontró tu perfil</h3>
+                    <p className="text-slate-500">Intenta cerrar sesión y volver a entrar.</p>
+                </div>
+            </div>
+        )
+    }
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault()
