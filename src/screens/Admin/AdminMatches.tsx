@@ -56,13 +56,19 @@ export default function AdminMatches() {
     const updateResult = async (matchId: string, local: number, visitor: number) => {
         const { error } = await supabase
             .from('matches')
-            .update({ local_score: local, visitor_score: visitor, status: 'finished' })
+            .update({
+                local_score: Math.floor(local),
+                visitor_score: Math.floor(visitor),
+                status: 'finished'
+            })
             .eq('id', matchId)
 
-        if (!error) {
-            // Trigger point calculation (ideally this should be a DB trigger or Edge Function)
-            // For now, we'll assume the DB function calculate_points is used in a view or during fetch
+        if (error) {
+            console.error(error)
+            alert("Error al finalizar partido: " + error.message)
+        } else {
             fetchMatches()
+            alert("Partido finalizado y puntos calculados!")
         }
     }
 

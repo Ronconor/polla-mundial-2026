@@ -13,6 +13,15 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+    React.useEffect(() => {
+        // Force redirect to root if page is refreshed, as requested
+        const navEntries = window.performance.getEntriesByType('navigation');
+        const isReload = navEntries.length > 0 && (navEntries[0] as any).type === 'reload';
+
+        if (isReload && window.location.pathname !== '/' && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+            window.location.replace('/');
+        }
+    }, [])
 
     return (
         <AuthProvider>
