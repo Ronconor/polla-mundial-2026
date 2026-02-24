@@ -118,12 +118,12 @@ export default function AdminMatches() {
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-400 uppercase">Módulo</label>
                             <select
-                                className="w-full h-10 border rounded px-3"
+                                className="w-full h-10 border rounded px-3 bg-white"
                                 value={form.community_id}
                                 onChange={e => setForm({ ...form, community_id: e.target.value })}
                                 required
                             >
-                                <option value="">Seleccionar...</option>
+                                <option value="" disabled>Seleccionar Módulo...</option>
                                 {communities.map(c => (
                                     <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}

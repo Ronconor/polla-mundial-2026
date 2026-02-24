@@ -48,7 +48,7 @@ export default function UserPredictions() {
         setPredictions(prev => ({
             ...prev,
             [matchId]: {
-                ...(prev[matchId] || { match_id: matchId, local_score: 0, visitor_score: 0 }),
+                ...(prev[matchId] || { match_id: matchId }),
                 [`${team}_score`]: val
             }
         }))
@@ -56,14 +56,21 @@ export default function UserPredictions() {
 
     const savePredictions = async () => {
         setSaving(true)
-        const toUpsert = Object.values(predictions).map(p => {
-            const match = matches.find(m => m.id === p.match_id)
-            return {
-                ...p,
-                profile_id: user?.id,
-                community_id: match?.community_id // Important for trigger logic
-            }
-        })
+        const toUpsert = Object.values(predictions)
+            .filter(p => p.local_score !== undefined && p.visitor_score !== undefined)
+            .map(p => {
+                const match = matches.find(m => m.id === p.match_id)
+                return {
+                    ...p,
+                    profile_id: user?.id,
+                    community_id: match?.community_id
+                }
+            })
+
+        if (toUpsert.length === 0) {
+            setSaving(false)
+            return
+        }
 
         const { error } = await supabase.from('predictions').upsert(toUpsert)
         if (!error) {
@@ -110,7 +117,7 @@ export default function UserPredictions() {
                                     const prediction = predictions[match.id]
                                     const isLocked = prediction?.is_finalized ||
                                         match.status === 'finished' ||
-                                        isBefore(new Date(match.match_date), subMinutes(new Date(), 10))
+                                        isBefore(new Date(match.match_date), new Date())
 
                                     return (
                                         <Card key={match.id} className={cn(
