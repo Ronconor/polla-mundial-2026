@@ -29,9 +29,13 @@ export default function RankingScreen() {
             .eq('profile_id', user?.id)
 
         if (data && data.length > 0) {
-            const comms = data.map((d: any) => d.communities)
-            setCommunities(comms)
-            setSelectedCommId(comms[0].id)
+            const comms = data.map((d: any) => d.communities).filter(Boolean)
+            if (comms.length > 0) {
+                setCommunities(comms)
+                setSelectedCommId(comms[0].id)
+            } else {
+                setLoading(false)
+            }
         } else {
             setLoading(false)
         }
@@ -105,17 +109,17 @@ export default function RankingScreen() {
                                 </div>
                                 <div className={`mb-4 relative`}>
                                     <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-2xl font-black shadow-inner border-2 border-white capitalize">
-                                        {member.profiles.nickname[0]}
+                                        {member.profiles?.nickname?.[0] || '?'}
                                     </div>
                                     <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-md ${getMedalColor(index)}`}>
                                         {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
                                     </div>
                                 </div>
                                 <h3 className="font-black text-slate-800 text-lg truncate w-full text-center">
-                                    {member.profiles.nickname}
+                                    {member.profiles?.nickname || 'Usuario'}
                                 </h3>
                                 <p className="text-3xl font-black text-primary-600 mt-2">
-                                    {member.points} <span className="text-sm font-medium text-slate-400">PTS</span>
+                                    {member.points || 0} <span className="text-sm font-medium text-slate-400">PTS</span>
                                 </p>
                             </Card>
                         ))}
@@ -131,7 +135,7 @@ export default function RankingScreen() {
                             {rankings.map((member, index) => (
                                 <div
                                     key={member.id}
-                                    className={`px-6 py-4 flex items-center justify-between transition-colors ${member.profiles.id === user?.id ? 'bg-primary-50/30' : 'hover:bg-slate-50/50'
+                                    className={`px-6 py-4 flex items-center justify-between transition-colors ${member.profiles?.id === user?.id ? 'bg-primary-50/30' : 'hover:bg-slate-50/50'
                                         }`}
                                 >
                                     <div className="flex items-center gap-4">
@@ -140,21 +144,21 @@ export default function RankingScreen() {
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-600 font-bold capitalize shadow-sm">
-                                                {member.profiles.nickname[0]}
+                                                {member.profiles?.nickname?.[0] || '?'}
                                             </div>
                                             <div>
                                                 <p className="font-bold text-slate-800 flex items-center gap-2">
-                                                    {member.profiles.nickname}
-                                                    {member.profiles.id === user?.id && (
+                                                    {member.profiles?.nickname || 'Usuario'}
+                                                    {member.profiles?.id === user?.id && (
                                                         <span className="text-[10px] bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded-full uppercase">Tú</span>
                                                     )}
                                                 </p>
-                                                <p className="text-xs text-slate-400">@{member.profiles.nickname.toLowerCase()}</p>
+                                                <p className="text-xs text-slate-400">@{member.profiles?.nickname?.toLowerCase() || 'desconocido'}</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-black text-xl text-slate-900 leading-none">{member.points}</p>
+                                        <p className="font-black text-xl text-slate-900 leading-none">{member.points || 0}</p>
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Puntos</p>
                                     </div>
                                 </div>
