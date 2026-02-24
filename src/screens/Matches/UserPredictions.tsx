@@ -96,11 +96,13 @@ export default function UserPredictions() {
         const { error } = await supabase
             .from('predictions')
             .upsert({
-                ...pred,
+                match_id: matchId,
                 profile_id: user?.id,
                 community_id: match.community_id,
+                local_score: pred.local_score,
+                visitor_score: pred.visitor_score,
                 is_finalized: true
-            })
+            }, { onConflict: 'match_id, profile_id' })
 
         if (!error) {
             await fetchMatchesAndPredictions()
