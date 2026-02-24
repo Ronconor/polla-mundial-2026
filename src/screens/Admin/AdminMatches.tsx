@@ -10,6 +10,7 @@ export default function AdminMatches() {
     const [communities, setCommunities] = useState<any[]>([])
     const [isAdding, setIsAdding] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [selectedFilter, setSelectedFilter] = useState<string>('all')
     const [form, setForm] = useState({
         local_team: '',
         visitor_team: '',
@@ -98,15 +99,27 @@ export default function AdminMatches() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">Gestión de Partidos</h1>
                     <p className="text-slate-500">Programa encuentros y registra resultados oficiales</p>
                 </div>
-                <Button onClick={() => setIsAdding(true)} className="gap-2">
-                    <Plus className="w-5 h-5" />
-                    Nuevo Partido
-                </Button>
+                <div className="flex gap-2 w-full sm:w-auto">
+                    <select
+                        className="h-10 border rounded px-3 bg-white text-sm font-medium border-slate-200"
+                        value={selectedFilter}
+                        onChange={e => setSelectedFilter(e.target.value)}
+                    >
+                        <option value="all">Todos los Módulos</option>
+                        {communities.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                    </select>
+                    <Button onClick={() => setIsAdding(true)} className="gap-2 shrink-0">
+                        <Plus className="w-5 h-5" />
+                        Nuevo
+                    </Button>
+                </div>
             </div>
 
             {isAdding && (
@@ -172,7 +185,10 @@ export default function AdminMatches() {
             ) : (
                 <div className="space-y-4">
                     {['Grupos', 'Octavos', 'Cuartos', 'Semis', 'Final'].map(phase => {
-                        const phaseMatches = matches.filter(m => m.phase === phase)
+                        const phaseMatches = matches.filter(m =>
+                            m.phase === phase &&
+                            (selectedFilter === 'all' || m.community_id === selectedFilter)
+                        )
                         if (phaseMatches.length === 0) return null
                         return (
                             <div key={phase} className="space-y-3">
@@ -182,6 +198,7 @@ export default function AdminMatches() {
                                         <MatchAdminCard
                                             key={match.id}
                                             match={match}
+                                            communityName={communities.find(c => c.id === match.community_id)?.name || 'Módulo'}
                                             onUpdateResult={updateResult}
                                             onDelete={deleteMatch}
                                         />
@@ -198,10 +215,12 @@ export default function AdminMatches() {
 
 function MatchAdminCard({
     match,
+    communityName,
     onUpdateResult,
     onDelete
 }: {
     match: Match,
+    communityName: string,
     onUpdateResult: (id: string, l: number, v: number) => void,
     onDelete: (id: string) => void
 }) {
@@ -255,6 +274,9 @@ function MatchAdminCard({
             </div>
 
             <div className="shrink-0 border-l pl-6 flex flex-col items-center gap-2">
+                <div className="bg-slate-100 text-[10px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded text-slate-500 mb-1">
+                    {communityName}
+                </div>
                 <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
                     <Calendar className="w-3.5 h-3.5" />
                     {format(new Date(match.match_date), "d MMM, HH:mm", { locale: es })}
