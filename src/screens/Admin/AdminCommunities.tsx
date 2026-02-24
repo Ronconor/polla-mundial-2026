@@ -104,6 +104,23 @@ function CommunityCard({ community, onRefresh, navigate }: { community: Communit
             .then(({ count }) => setMembersCount(count || 0))
     }, [community.id])
 
+    const handleDelete = async () => {
+        if (!confirm(`¿Estás seguro de que deseas eliminar el módulo "${community.name}"? Esta acción borrará a todos los participantes y sus predicciones.`)) {
+            return
+        }
+
+        const { error } = await supabase
+            .from('communities')
+            .delete()
+            .eq('id', community.id)
+
+        if (error) {
+            alert('Error al eliminar: ' + error.message)
+        } else {
+            onRefresh()
+        }
+    }
+
     return (
         <Card className="hover:border-primary-200 transition-all group">
             <div className="flex justify-between items-start mb-4">
@@ -111,7 +128,12 @@ function CommunityCard({ community, onRefresh, navigate }: { community: Communit
                     <Shield className="w-6 h-6" />
                 </div>
                 <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400 hover:text-red-500">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                        onClick={handleDelete}
+                    >
                         <Trash2 className="w-4 h-4" />
                     </Button>
                 </div>

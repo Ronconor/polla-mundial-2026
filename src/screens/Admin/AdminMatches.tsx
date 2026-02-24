@@ -79,6 +79,23 @@ export default function AdminMatches() {
         }
     }
 
+    const deleteMatch = async (matchId: string) => {
+        if (!confirm('¿Estás seguro de que deseas eliminar este partido? Se borrarán también todas las predicciones asociadas.')) {
+            return
+        }
+
+        const { error } = await supabase
+            .from('matches')
+            .delete()
+            .eq('id', matchId)
+
+        if (error) {
+            alert('Error al eliminar partido: ' + error.message)
+        } else {
+            fetchMatches()
+        }
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -162,7 +179,12 @@ export default function AdminMatches() {
                                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest px-2">{phase}</h3>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     {phaseMatches.map(match => (
-                                        <MatchAdminCard key={match.id} match={match} onUpdateResult={updateResult} />
+                                        <MatchAdminCard
+                                            key={match.id}
+                                            match={match}
+                                            onUpdateResult={updateResult}
+                                            onDelete={deleteMatch}
+                                        />
                                     ))}
                                 </div>
                             </div>
@@ -174,15 +196,31 @@ export default function AdminMatches() {
     )
 }
 
-function MatchAdminCard({ match, onUpdateResult }: { match: Match, onUpdateResult: (id: string, l: number, v: number) => void }) {
+function MatchAdminCard({
+    match,
+    onUpdateResult,
+    onDelete
+}: {
+    match: Match,
+    onUpdateResult: (id: string, l: number, v: number) => void,
+    onDelete: (id: string) => void
+}) {
     const [scores, setScores] = useState({
         local: match.local_score ?? 0,
         visitor: match.visitor_score ?? 0
     })
 
     return (
-        <Card className="flex items-center justify-between gap-6">
+        <Card className="flex items-center justify-between gap-6 group">
             <div className="flex-1 flex items-center justify-between">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-8 w-8 p-0 bg-white border border-slate-100 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full"
+                    onClick={() => onDelete(match.id)}
+                >
+                    <Trash2 className="w-4 h-4" />
+                </Button>
                 <div className="text-right flex-1">
                     <p className="font-bold text-slate-800">{match.local_team}</p>
                 </div>
