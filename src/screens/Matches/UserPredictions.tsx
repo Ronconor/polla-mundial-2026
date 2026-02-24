@@ -81,14 +81,27 @@ export default function UserPredictions() {
 
     const finalizePrediction = async (matchId: string) => {
         const pred = predictions[matchId]
-        if (!pred) return
+        const match = matches.find(m => m.id === matchId)
 
+        if (!pred || pred.local_score === undefined || pred.visitor_score === undefined || !match) {
+            alert("Por favor, ingresa ambos marcadores antes de finalizar.")
+            return
+        }
+
+        setSaving(true)
         const { error } = await supabase
             .from('predictions')
-            .update({ is_finalized: true })
-            .eq('id', pred.id)
+            .upsert({
+                ...pred,
+                profile_id: user?.id,
+                community_id: match.community_id,
+                is_finalized: true
+            })
 
-        if (!error) fetchMatchesAndPredictions()
+        if (!error) {
+            await fetchMatchesAndPredictions()
+        }
+        setSaving(false)
     }
 
     return (
