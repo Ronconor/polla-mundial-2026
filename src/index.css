@@ -34,6 +34,6 @@
     }
 
     .card {
-        @apply bg-white rounded-xl shadow-sm border border-slate-100 p-4;
+        @apply bg-white rounded-xl shadow-sm border border-slate-100 p-4 relative;
     }
 }
