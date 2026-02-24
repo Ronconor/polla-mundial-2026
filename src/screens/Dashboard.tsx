@@ -15,15 +15,49 @@ import UserCommunities from './Communities/UserCommunities'
 export default function Dashboard() {
     const { profile, isAdmin, user } = useAuth()
     const location = useLocation()
+    const [communities, setCommunities] = useState<any[]>([])
+    const [activeCommId, setActiveCommId] = useState<string | null>(null)
     const [totalPoints, setTotalPoints] = useState<number>(0)
 
     useEffect(() => {
         if (user) {
-            fetchTotalPoints()
+            fetchCommunities()
         }
     }, [user])
 
-    const fetchTotalPoints = async () => {
+    useEffect(() => {
+        if (user && activeCommId) {
+            fetchPointsForCommunity(activeCommId)
+        } else if (user && !activeCommId) {
+            fetchGlobalTotal()
+        }
+    }, [user, activeCommId])
+
+    const fetchCommunities = async () => {
+        const { data } = await supabase
+            .from('community_members')
+            .select('community_id, communities(id, name)')
+            .eq('profile_id', user?.id)
+
+        if (data) {
+            const comms = data.map((d: any) => d.communities).filter(Boolean)
+            setCommunities(comms)
+            if (comms.length > 0) setActiveCommId(comms[0].id)
+        }
+    }
+
+    const fetchPointsForCommunity = async (commId: string) => {
+        const { data } = await supabase
+            .from('community_members')
+            .select('points')
+            .eq('profile_id', user?.id)
+            .eq('community_id', commId)
+            .single()
+
+        if (data) setTotalPoints(data.points || 0)
+    }
+
+    const fetchGlobalTotal = async () => {
         const { data } = await supabase
             .from('community_members')
             .select('points')
@@ -129,9 +163,18 @@ export default function Dashboard() {
                         Hola, {profile?.nickname} 👋
                     </h2>
                     <div className="flex items-center gap-4">
+                        <select
+                            className="h-9 border rounded-lg px-2 bg-slate-50 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-primary-500 max-w-[120px]"
+                            value={activeCommId || ''}
+                            onChange={(e) => setActiveCommId(e.target.value)}
+                        >
+                            {communities.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
                         <div className="text-right hidden sm:block">
-                            <p className="text-xs text-slate-500">Mi Puntaje</p>
-                            <p className="font-bold text-primary-600">{totalPoints} pts</p>
+                            <p className="text-[10px] uppercase font-bold text-slate-400">Puntaje</p>
+                            <p className="font-black text-primary-600 leading-none">{totalPoints} pts</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold border-2 border-white shadow-sm capitalize">
                             {profile?.nickname?.[0] || 'U'}
