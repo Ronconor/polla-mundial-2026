@@ -54,27 +54,31 @@ export default function UserPredictions() {
         }))
     }
 
-    const savePredictions = async () => {
-        setSaving(true)
-        const toUpsert = Object.values(predictions)
-            .filter(p => p.local_score !== undefined && p.visitor_score !== undefined)
-            .map(p => {
-                const match = matches.find(m => m.id === p.match_id)
-                return {
-                    ...p,
-                    profile_id: user?.id,
-                    community_id: match?.community_id
-                }
-            })
+    const saveSinglePrediction = async (matchId: string) => {
+        const pred = predictions[matchId]
+        const match = matches.find(m => m.id === matchId)
 
-        if (toUpsert.length === 0) {
-            setSaving(false)
+        if (!pred || pred.local_score === undefined || pred.visitor_score === undefined || !match) {
+            alert("Por favor, ingresa ambos marcadores.")
             return
         }
 
-        const { error } = await supabase.from('predictions').upsert(toUpsert)
-        if (!error) {
-            await fetchMatchesAndPredictions()
+        setSaving(true)
+        const { data, error } = await supabase
+            .from('predictions')
+            .upsert({
+                ...pred,
+                profile_id: user?.id,
+                community_id: match.community_id,
+            })
+            .select()
+
+        if (!error && data) {
+            // Update local state with the returned ID if it's new
+            setPredictions(prev => ({
+                ...prev,
+                [matchId]: data[0]
+            }))
         }
         setSaving(false)
     }
@@ -109,12 +113,8 @@ export default function UserPredictions() {
             <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-20 z-10">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">Mis Predicciones</h1>
-                    <p className="text-slate-500">Ingresa tus marcadores antes del inicio de los partidos</p>
+                    <p className="text-slate-500">Ingresa tus marcadores antes del inicio de cada partido</p>
                 </div>
-                <Button onClick={savePredictions} isLoading={saving} className="gap-2">
-                    <Save className="w-5 h-5" />
-                    Guardar Cambios
-                </Button>
             </div>
 
             <div className="space-y-8">
@@ -180,9 +180,9 @@ export default function UserPredictions() {
                                                     </div>
                                                 </div>
 
-                                                <div className="pt-2">
+                                                <div className="pt-2 flex gap-2">
                                                     {isLocked ? (
-                                                        <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 bg-slate-200/50 py-2 rounded-lg">
+                                                        <div className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-400 bg-slate-200/50 py-2 rounded-lg">
                                                             {match.status === 'finished' ? (
                                                                 <>
                                                                     <Trophy className="w-4 h-4 text-accent-gold" />
@@ -197,14 +197,27 @@ export default function UserPredictions() {
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="w-full text-xs font-bold border-primary-100 text-primary-600 hover:bg-primary-50"
-                                                            onClick={() => finalizePrediction(match.id)}
-                                                        >
-                                                            Finalizar Predicción
-                                                        </Button>
+                                                        <>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="flex-1 text-xs font-bold border-slate-200 text-slate-600 hover:bg-slate-50"
+                                                                onClick={() => saveSinglePrediction(match.id)}
+                                                                isLoading={saving}
+                                                            >
+                                                                <Save className="w-3 h-3 mr-1" />
+                                                                Guardar
+                                                            </Button>
+                                                            <Button
+                                                                variant="primary"
+                                                                size="sm"
+                                                                className="flex-1 text-xs font-bold"
+                                                                onClick={() => finalizePrediction(match.id)}
+                                                                isLoading={saving}
+                                                            >
+                                                                Finalizar
+                                                            </Button>
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>
